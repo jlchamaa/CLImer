@@ -1,3 +1,4 @@
+from digits import bigDigits,bigDigitsIndexes
 import time
 import curses
 
@@ -31,27 +32,40 @@ def resizeWindows(windowArray):
 def refreshWindows(windowArray):
     for i in range(1,5):
         windowArray[i].border()
-        windowArray[i].addstr(1,1,str(i))
-        windowArray[i].refresh()
-        tempChar = windowArray[i].getch()
-        windowArray[i].addch(tempChar)
         windowArray[i].refresh()
 
-#def processMainInput(inputKey,windowArray):
+def processMainInput(inputKey,windowArray):
+    if(inputKey==' '):
+        windowArray[1].nodelay(1)
+        timer(windowArray[1])
+        windowArray[1].nodelay(0)
+    else:
+        windowArray[3].addstr(4,4,bigDigits[3])
+        refreshWindows(windowArray)
 
-def timer(stdscr):
-    d="p"; # not space
+def timer(window):
+    d="p" # not space
     curtime=0
-    stdscr.addstr(15,0, "Timer running")
     start = time.time()
-    stdscr.nodelay(1)
-    while(d!=32): #character for space
+    while(d!=32 and d!=27): #character for space
         now = time.time()
-        tick = round(now-start,2); 
+        tick = round(now-start,1) 
         if(curtime!=tick):
-            curtime=tick;
-            stdscr.addstr(17,0, str(curtime))
-        d=stdscr.getch()
+            curtime=tick
+            window.addstr(17,0, str(curtime))
+            drawTime(curtime,window)
+        d=window.getch()
+    #TODO add database logic
+
+def drawTime(time,window):
+    window.clear()
+    integerPart = int(round(time))
+    i=1
+    for digitsLine in bigDigits:
+        lineToWrite = digitsLine[bigDigitsIndexes[integerPart]:bigDigitsIndexes[integerPart+1]]
+        window.addstr(i,1,lineToWrite)
+        i += 1
+    
 
 def main(stdscr):
     windowArray = initializeWindows(stdscr)
@@ -59,4 +73,5 @@ def main(stdscr):
     refreshWindows(windowArray)
     mainInput = windowArray[1].getkey() # wait for ch input from user
     processMainInput(mainInput,windowArray)
+    exit = windowArray[1].getkey() # wait for ch input from user
 curses.wrapper(main)
