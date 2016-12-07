@@ -53,16 +53,32 @@ def timer(window):
         if(curtime!=tick):
             curtime=tick
             window.addstr(17,0, str(curtime))
-            drawTime(curtime,window)
+            drawTime(curtime,window,False)
         d=window.getch()
     #TODO add database logic
 
-def drawTime(time,window):
+def drawTime(time,window,showJiffies):
     window.clear()
-    integerPart = int(round(time))
+    minutes   = int(time/60)
+    seconds   = time%60
+    tensPlace = int(seconds/10)
+    onesPlace = int(seconds%10)
+    jiffies   = seconds % 1
+    tenths    = int(jiffies*10)
+    hundredths= int(jiffies*100)
     i=1
     for digitsLine in bigDigits:
-        lineToWrite = digitsLine[bigDigitsIndexes[integerPart]:bigDigitsIndexes[integerPart+1]]
+        lineToWrite = ""
+        if(minutes>0):
+            lineToWrite += digitsLine[bigDigitsIndexes[minutes]:bigDigitsIndexes[minutes+1]]
+            lineToWrite += "                     "
+        if(tensPlace>0 or minutes>1):
+            lineToWrite += digitsLine[bigDigitsIndexes[tensPlace]:bigDigitsIndexes[tensPlace+1]]
+        lineToWrite += digitsLine[bigDigitsIndexes[onesPlace]:bigDigitsIndexes[onesPlace+1]]
+        lineToWrite += digitsLine[bigDigitsIndexes[10]:bigDigitsIndexes[11]] #add in my decimal
+        lineToWrite += digitsLine[bigDigitsIndexes[tenths]:bigDigitsIndexes[tenths+1]]
+        if(showJiffies):
+            lineToWrite += digitsLine[bigDigitsIndexes[hundredths]:bigDigitsIndexes[hundredths+1]]
         window.addstr(i,1,lineToWrite)
         i += 1
     
