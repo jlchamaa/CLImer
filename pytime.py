@@ -49,41 +49,50 @@ def timer(window):
     start = time.time()
     while(d!=32 and d!=27): #character for space
         now = time.time()
-        tick = round(now-start,1) 
+        tick = round(now-start,2) 
         if(curtime!=tick):
             curtime=tick
-            window.addstr(17,0, str(curtime))
-            drawTime(curtime,window,False)
+            drawTime(curtime,window)
         d=window.getch()
     #TODO add database logic
 
-def drawTime(time,window,showJiffies):
-    window.clear()
-    minutes   = int(time/60)
+def drawTime(time,window):
+    #window.clear()
+    tenmins   = int(time/600)
+    minutes   = int(time/60) % 10
     seconds   = time%60
     tensPlace = int(seconds/10)
     onesPlace = int(seconds%10)
     jiffies   = seconds % 1
     tenths    = int(jiffies*10)
-    hundredths= int(jiffies*100)
+    hundredths= int(jiffies*100 % 10)
     i=1
     for digitsLine in bigDigits:
         lineToWrite = ""
-        if(minutes>0):
-            lineToWrite += digitsLine[bigDigitsIndexes[minutes]:bigDigitsIndexes[minutes+1]]
-            lineToWrite += "                     "
-        if(tensPlace>0 or minutes>1):
-            lineToWrite += digitsLine[bigDigitsIndexes[tensPlace]:bigDigitsIndexes[tensPlace+1]]
-        lineToWrite += digitsLine[bigDigitsIndexes[onesPlace]:bigDigitsIndexes[onesPlace+1]]
-        lineToWrite += digitsLine[bigDigitsIndexes[10]:bigDigitsIndexes[11]] #add in my decimal
-        lineToWrite += digitsLine[bigDigitsIndexes[tenths]:bigDigitsIndexes[tenths+1]]
-        if(showJiffies):
-            lineToWrite += digitsLine[bigDigitsIndexes[hundredths]:bigDigitsIndexes[hundredths+1]]
+        lineToWrite += fetchDigitChunk(digitsLine,tenmins,time<600) #tens place of mins
+        lineToWrite += fetchDigitChunk(digitsLine,minutes,time<60) #singles of mins 
+        lineToWrite += fetchDigitChunk(digitsLine,11,time<60) # add colon
+        lineToWrite += fetchDigitChunk(digitsLine,tensPlace,time<10) # add tensPlace
+        lineToWrite += fetchDigitChunk(digitsLine,onesPlace,time<1) # add tensPlace
+        lineToWrite += fetchDigitChunk(digitsLine,10,False) # add tensPlace
+        lineToWrite += fetchDigitChunk(digitsLine,tenths,False) # add tensPlace
+        lineToWrite += fetchDigitChunk(digitsLine,hundredths,False) # add tensPlace
         window.addstr(i,1,lineToWrite)
         i += 1
-    
+def fetchDigitChunk(line,number,empty):
+# 10 gets .   11 get : 
+    if empty:
+        size = bigDigitsIndexes[number+1]-bigDigitsIndexes[number]
+        space = ""
+        for i in range(0,size):
+            space += " "
+        return space
+    else:
+        return  line[bigDigitsIndexes[number]:bigDigitsIndexes[number+1]]
+
 
 def main(stdscr):
+    curses.curs_set(0)
     windowArray = initializeWindows(stdscr)
     resizeWindows(windowArray)
     refreshWindows(windowArray)
