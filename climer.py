@@ -1,4 +1,5 @@
-from digits import bigDigits,bigDigitsIndexes
+from res import digits
+from res import dbFunctions
 import time
 import curses
 
@@ -36,14 +37,16 @@ def refreshWindows(windowArray):
 
 def processMainInput(inputKey,windowArray):
     if(inputKey==' '):
-        windowArray[1].nodelay(1)
         timer(windowArray[1])
-        windowArray[1].nodelay(0)
+        return True
+    elif(inputKey == 'e'):
+        return False
     else:
-        windowArray[3].addstr(4,4,bigDigits[3])
         refreshWindows(windowArray)
+        return True
 
 def timer(window):
+    window.nodelay(1)
     d="p" # not space
     curtime=0
     start = time.time()
@@ -54,10 +57,10 @@ def timer(window):
             curtime=tick
             drawTime(curtime,window)
         d=window.getch()
-    #TODO add database logic
-
+    window.nodelay(0)
+    #writeDb(dbCursor,session,curtime,0,)
 def drawTime(time,window):
-    #window.clear()
+    #bigDigitsHeight
     tenmins   = int(time/600)
     minutes   = int(time/60) % 10
     seconds   = time%60
@@ -66,8 +69,8 @@ def drawTime(time,window):
     jiffies   = seconds % 1
     tenths    = int(jiffies*10)
     hundredths= int(jiffies*100 % 10)
-    i=1
-    for digitsLine in bigDigits:
+    i=10
+    for digitsLine in digits.bigDigits:
         lineToWrite = ""
         lineToWrite += fetchDigitChunk(digitsLine,tenmins,time<600) #tens place of mins
         lineToWrite += fetchDigitChunk(digitsLine,minutes,time<60) #singles of mins 
@@ -77,26 +80,29 @@ def drawTime(time,window):
         lineToWrite += fetchDigitChunk(digitsLine,10,False) # add tensPlace
         lineToWrite += fetchDigitChunk(digitsLine,tenths,False) # add tensPlace
         lineToWrite += fetchDigitChunk(digitsLine,hundredths,False) # add tensPlace
-        window.addstr(i,1,lineToWrite)
+        window.addstr(i,15,lineToWrite)
         i += 1
 def fetchDigitChunk(line,number,empty):
 # 10 gets .   11 get : 
     if empty:
-        size = bigDigitsIndexes[number+1]-bigDigitsIndexes[number]
+        size = digits.bigDigitsIndexes[number+1]-digits.bigDigitsIndexes[number]
         space = ""
         for i in range(0,size):
             space += " "
         return space
     else:
-        return  line[bigDigitsIndexes[number]:bigDigitsIndexes[number+1]]
+        return  line[digits.bigDigitsIndexes[number]:digits.bigDigitsIndexes[number+1]]
 
 
 def main(stdscr):
+    global dbCursor
+    dbCursor = dbFunctions.connectDb() 
     curses.curs_set(0)
     windowArray = initializeWindows(stdscr)
     resizeWindows(windowArray)
     refreshWindows(windowArray)
-    mainInput = windowArray[1].getkey() # wait for ch input from user
-    processMainInput(mainInput,windowArray)
-    exit = windowArray[1].getkey() # wait for ch input from user
+    status = True;
+    while status: 
+        mainInput = windowArray[1].getkey() # wait for ch input from user
+        status = processMainInput(mainInput,windowArray)
 curses.wrapper(main)
