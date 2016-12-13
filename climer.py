@@ -1,4 +1,6 @@
 from resources import session
 import curses
-Sesh = session.session() 
-curses.wrapper(Sesh.play)
+def main(stdscr):
+    sesh = session.session(stdscr)
+    sesh.play()
+curses.wrapper(main)
