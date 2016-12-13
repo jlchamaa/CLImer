@@ -4,15 +4,15 @@ class windowManager:
 
     def __init__(self,stdscr):
         curses.curs_set(0)
-	self.windowArray = self.initializeWindows(stdscr)
+	self.initializeWindows(stdscr)
 	self.resizeWindows()
 
     def initializeWindows(self,stdscr):
-        windowArray= []
-        windowArray.append(stdscr)
-        for i in range(1,5): #inconsequential iterator
-            windowArray.append(curses.newwin(1,1,0,0))
-        return windowArray
+        self.mainScreen = stdscr
+        self.winTimer = curses.newwin(1,1,0,0)
+        self.winLog = curses.newwin(1,1,0,0)
+        self.winOptions = curses.newwin(1,1,0,0)
+        self.winStats = curses.newwin(1,1,0,0)
 
 #   stdscr = 0
 #  ############
@@ -23,21 +23,17 @@ class windowManager:
 #  ############
 
     def resizeWindows(self):
-        (maxY,maxX) = self.windowArray[0].getmaxyx()
+        (maxY,maxX) = self.mainScreen.getmaxyx()
         horizontalDividerIndex = int(round(maxY*0.8))
         verticalDividerIndex = int(round(maxX*0.8))
-        self.windowArray[1].resize(horizontalDividerIndex-1,verticalDividerIndex-1)
-        self.windowArray[2].mvwin(0,verticalDividerIndex+1)
-        self.windowArray[2].resize(horizontalDividerIndex-1,maxX-verticalDividerIndex+1)
-        self.windowArray[3].mvwin(horizontalDividerIndex+1,0)
-        self.windowArray[3].resize(maxY-horizontalDividerIndex+1,verticalDividerIndex-1)
-        self.windowArray[4].mvwin(horizontalDividerIndex+1,verticalDividerIndex+1)
-        self.windowArray[4].resize(maxY-horizontalDividerIndex+1,maxX-verticalDividerIndex+1)
+        self.winTimer.resize(horizontalDividerIndex-1,verticalDividerIndex-1)
+        self.winLog.mvwin(0,verticalDividerIndex+1)
+        self.winLog.resize(horizontalDividerIndex-1,maxX-verticalDividerIndex+1)
+        self.winOptions.mvwin(horizontalDividerIndex+1,0)
+        self.winOptions.resize(maxY-horizontalDividerIndex+1,verticalDividerIndex-1)
+        self.winStats.mvwin(horizontalDividerIndex+1,verticalDividerIndex+1)
+        self.winStats.resize(maxY-horizontalDividerIndex+1,maxX-verticalDividerIndex+1)
 
-    def refreshWindows(self):
-        for i in range(1,5):
-            self.windowArray[i].border()
-            self.windowArray[i].refresh()
 
     def drawTime(self,time):
         tenmins   = int(time/600)
@@ -59,7 +55,7 @@ class windowManager:
             lineToWrite += self.fetchDigitChunk(digitsLine,10,False) # add tensPlace
             lineToWrite += self.fetchDigitChunk(digitsLine,tenths,False) # add tensPlace
             lineToWrite += self.fetchDigitChunk(digitsLine,hundredths,False) # add tensPlace
-            self.windowArray[1].addstr(i,15,lineToWrite)
+            self.winTimer.addstr(i,15,lineToWrite)
             i += 1
     def fetchDigitChunk(self,line,number,empty):
 # 10 gets .   11 get : 
@@ -72,10 +68,10 @@ class windowManager:
         else:
             return  line[bigDigitsIndexes[number]:bigDigitsIndexes[number+1]]
     def getKey(self):
-        return self.windowArray[1].getkey() # wait for ch input from user
+        return self.winTimer.getkey() # wait for ch input from user
 
     def getCh(self):
-        return self.windowArray[1].getch() # wait for ch input from user
+        return self.winTimer.getch() # wait for ch input from user
 
     def noDelayOn(self,onSwitch):
-        self.windowArray[1].nodelay(onSwitch)
+        self.winTimer.nodelay(onSwitch)

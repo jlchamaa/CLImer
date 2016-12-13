@@ -18,7 +18,6 @@ class session:
         elif(inputKey == 'e'):
             return False
         else:
-            self.winMan.refreshWindows()
             return True
 
     def timer(self):
