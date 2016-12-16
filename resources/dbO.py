@@ -2,13 +2,15 @@ import sqlite3
 import os
 class dbO:
     def __init__(self):
-        if(os.path.isfile("./times.db")):
-            self.db = sqlite3.connect("times.db")
+        pathOfResources = os.path.dirname(os.path.abspath(__file__))
+        requiredDbPath = pathOfResources + "/times.db"
+        if(os.path.isfile(requiredDbPath)):
+            self.db = sqlite3.connect(requiredDbPath)
         else:
-            self.db = self.createDb()
+            self.db = self.createDb(requiredDbPath)
 
-    def createDb(self):
-        db = sqlite3.connect("times.db")
+    def createDb(self,requiredDbPath):
+        db = sqlite3.connect(requiredDbPath)
         db.execute('''CREATE TABLE TIMES
                     (session text, time real, plusTwo int, date text, scramble text)''')
         return db

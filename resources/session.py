@@ -6,9 +6,9 @@ import random
 
 class session:
     def __init__(self,stdscr):
-        self.scramble = self.createScramble()
         self.dbObject = dbO.dbO()
         self.winMan = windowManager.windowManager(stdscr)
+        self.inspection = 15
 
 
     def processMainInput(self,inputKey):
@@ -21,26 +21,24 @@ class session:
             return True
 
     def timer(self):
-        scramble = self.createScramble()
         self.winMan.noDelayOn(1)
         d="p" # not space
         curtime=0
         start = time.time()
         while(d!=32 and d!=27): #character for space
             now = time.time()
-            tick = round(now-start,2) 
+            tick = round(now-start-self.inspection,2)
             if(curtime!=tick):
                 curtime=tick
-                self.winMan.drawTime(curtime)
+                self.winMan.drawTime(abs(curtime),curtime>0)
             d = self.winMan.getCh()
         self.winMan.noDelayOn(0)
-        #dbObject.writeDb(dbCursor,"main",curtime,0,"12-11-16",scramble)
 
     def createScramble(self):
         scramble = ""
         directions=["F","B","D","U","L","R"]
-        lastDir=" "
-        cases=[" ","\' ","2 "]
+        lastDir="j"
+        cases=[" ","' ","2 "]
         i=0
         while(i<20):
             i += 1
@@ -52,9 +50,10 @@ class session:
             scramble += newDir
             scramble += cases[random.randint(0,2)]
         return scramble
-
     def play(self):
         status = True;
         while status: 
+            scramble = self.createScramble()
+            self.winMan.showScramble(scramble)
             mainInput = self.winMan.getKey() 
             status = self.processMainInput(mainInput)
