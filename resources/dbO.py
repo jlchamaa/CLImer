@@ -11,12 +11,19 @@ class dbO:
 
     def createDb(self,requiredDbPath):
         db = sqlite3.connect(requiredDbPath)
-        db.execute('''CREATE TABLE TIMES
-                    (session text, time real, plusTwo int, date text, scramble text)''')
+        db.execute("""CREATE TABLE TIMES
+                    (session text, time real, plusTwo int, date text, scramble text)""")
         return db
-    def printDb(self):
-        for record in db.execute("SELECT * FROM TIMES"):
-            print record
 
-    def writeDb(self,session,time,plusTwo,date,scramble):
-        self.db.execute("INSERT INTO TIMES VALUES (?,?,?,?,?)",(session,time,plusTwo,date,scramble))
+    def deliverDb(self,seshName):
+        retObj = []
+        sessionName = (seshName,)
+        dbCurs = self.db.execute("""    SELECT time , plusTwo FROM TIMES  
+                                            WHERE session=?;""",sessionName)
+        for record in dbCurs: 
+            retObj.append(record)
+        return retObj
+
+    def writeDb(self,solve):
+        self.db.execute("INSERT INTO TIMES VALUES (?,?,?,?,?)",(solve['session'],solve['time'],solve['plusTwo'],solve['date'],solve['scramble']))
+        self.db.commit()

@@ -1,5 +1,6 @@
 from resources import dbO
 from resources import windowManager
+import datetime
 import time
 import curses
 import random
@@ -9,11 +10,16 @@ class session:
         self.dbObject = dbO.dbO()
         self.winMan = windowManager.windowManager(stdscr)
         self.inspection = 15
-
+        self.sessionName = "JLC"
+        self.solve = {}
 
     def processMainInput(self,inputKey):
         if(inputKey==' '):
-            self.timer()
+            self.solve['time'] = self.timer()
+            self.solve['plusTwo'] = True
+            self.solve['session'] = self.sessionName 
+            self.solve['date'] = datetime.datetime.now()
+            self.dbObject.writeDb(self.solve)
             return True
         elif(inputKey == 'e'):
             return False
@@ -33,6 +39,7 @@ class session:
                 self.winMan.drawTime(abs(curtime),curtime>0)
             d = self.winMan.getCh()
         self.winMan.noDelayOn(0)
+        return curtime
 
     def createScramble(self):
         scramble = ""
@@ -53,7 +60,10 @@ class session:
     def play(self):
         status = True;
         while status: 
+            self.solve.clear()
             scramble = self.createScramble()
             self.winMan.showScramble(scramble)
+            self.solve['scramble'] = scramble
+            self.winMan.showLog(self.dbObject.deliverDb(self.sessionName))
             mainInput = self.winMan.getKey() 
             status = self.processMainInput(mainInput)

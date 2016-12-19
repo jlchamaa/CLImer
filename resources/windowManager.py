@@ -1,7 +1,7 @@
 import curses
 from resources.digits import bigDigits,bigDigitsIndexes
+NumericWidth = 142
 class windowManager:
-
     def __init__(self,stdscr):
         curses.curs_set(0)
 	self.initializeWindows(stdscr)
@@ -17,11 +17,13 @@ class windowManager:
 
     def resizeWindows(self):
         (maxY,maxX) = self.mainScreen.getmaxyx()
-        if(maxX>142):
-            self.winTimer.resize(16,143)
-            self.winTimer.mvwin(1,int((maxX-142)/2))
+        if(maxX>NumericWidth):
+            self.winTimer.resize(16,NumericWidth+1)
+            self.winTimer.mvwin(1,int((maxX-NumericWidth)/2))
             self.winScramble.resize(3,maxX)
             self.winScramble.mvwin(17,0)
+            self.winLog.resize(20,60)
+            self.winLog.mvwin(22,2)
         else:
             horizontalDividerIndex = int(round(maxY*0.8))
             verticalDividerIndex = int(round(maxX*0.8))
@@ -43,6 +45,14 @@ class windowManager:
         self.winScramble.addstr(1,startXCoord,scramble)
         self.winScramble.refresh()
 
+    def showLog(self,dataObj):
+        self.winLog.clear()
+        line = 0
+        for i in dataObj:
+            self.winLog.addstr(line,0,str(i))
+            line +=1
+        self.winLog.refresh()
+
     def drawTime(self,time,positive):
         tenmins   = int(time/600)
         minutes   = int(time/60) % 10
@@ -63,7 +73,8 @@ class windowManager:
             lineToWrite += self.fetchDigitChunk(digitsLine,10,True) # add decimal
             lineToWrite += self.fetchDigitChunk(digitsLine,tenths,True) # add tenths
             lineToWrite += self.fetchDigitChunk(digitsLine,hundredths,positive) # add hundredths
-            self.winTimer.addstr(i,0,lineToWrite)
+            indentation = (NumericWidth - len(lineToWrite))/2
+            self.winTimer.addstr(i,indentation,lineToWrite)
             i += 1
     def fetchDigitChunk(self,line,number,show):
         # 10 gets .   11 get : 
