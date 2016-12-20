@@ -47,35 +47,42 @@ class windowManager:
 
     def showLog(self,dataObj):
         self.winLog.clear()
+        self.winLog.border()
         line = 0
         for i in dataObj:
-            self.winLog.addstr(line,0,str(i))
+            stringToWrite = str(i[0])
+            self.winLog.addstr(line,1,stringToWrite.rjust(17))
             line +=1
         self.winLog.refresh()
 
     def drawTime(self,time,positive):
-        tenmins   = int(time/600)
-        minutes   = int(time/60) % 10
-        seconds   = time%60
-        tensPlace = int(seconds/10)
-        onesPlace = int(seconds%10)
-        jiffies   = seconds % 1
-        tenths    = int(jiffies*10)
-        hundredths= int(jiffies*100 % 10)
+        digits = self.secondsToDigits(time)
         i=0
         for digitsLine in bigDigits:
             lineToWrite = ""
-            lineToWrite += self.fetchDigitChunk(digitsLine,tenmins,time>600) #tens place of mins
-            lineToWrite += self.fetchDigitChunk(digitsLine,minutes,time>60) #singles of mins 
+            lineToWrite += self.fetchDigitChunk(digitsLine,digits['tenmins'],time>600) #tens place of mins
+            lineToWrite += self.fetchDigitChunk(digitsLine,digits['minutes'],time>60) #singles of mins 
             lineToWrite += self.fetchDigitChunk(digitsLine,11,time>60) # add colon
-            lineToWrite += self.fetchDigitChunk(digitsLine,tensPlace,time>10) # add tensPlace
-            lineToWrite += self.fetchDigitChunk(digitsLine,onesPlace,True) # add onesPlace
+            lineToWrite += self.fetchDigitChunk(digitsLine,digits['tensPlace'],time>10) # add tensPlace
+            lineToWrite += self.fetchDigitChunk(digitsLine,digits['onesPlace'],True) # add onesPlace
             lineToWrite += self.fetchDigitChunk(digitsLine,10,True) # add decimal
-            lineToWrite += self.fetchDigitChunk(digitsLine,tenths,True) # add tenths
-            lineToWrite += self.fetchDigitChunk(digitsLine,hundredths,positive) # add hundredths
+            lineToWrite += self.fetchDigitChunk(digitsLine,digits['tenths'],True) # add tenths
+            lineToWrite += self.fetchDigitChunk(digitsLine,digits['hundredths'],positive) # add hundredths
             indentation = (NumericWidth - len(lineToWrite))/2
             self.winTimer.addstr(i,indentation,lineToWrite)
             i += 1
+    def secondsToDigits(self,time):
+        timeDigits = {}
+        timeDigits['tenmins'] = int(time/600)
+        timeDigits['minutes'] = int(time/60) % 10
+        seconds = time%60
+        timeDigits['tensPlace'] = int(seconds/10)
+        timeDigits['onesPlace'] = int(seconds%10)
+        jiffies = seconds % 1
+        timeDigits['tenths'] = int(jiffies*10)
+        timeDigits['hundredths'] = int(jiffies*100 % 10)
+        return timeDigits
+ 
     def fetchDigitChunk(self,line,number,show):
         # 10 gets .   11 get : 
         if show:
