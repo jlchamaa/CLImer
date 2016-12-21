@@ -18,12 +18,14 @@ class windowManager:
     def resizeWindows(self):
         (maxY,maxX) = self.mainScreen.getmaxyx()
         if(maxX>NumericWidth):
-            self.winTimer.resize(16,NumericWidth+1)
             self.winTimer.mvwin(1,int((maxX-NumericWidth)/2))
-            self.winScramble.resize(3,maxX)
+            self.winTimer.resize(16,NumericWidth+1)
             self.winScramble.mvwin(17,0)
+            self.winScramble.resize(3,maxX)
+            self.winOptions.mvwin(21,0)
+            self.winOptions.resize(4,maxX)
+            self.winLog.mvwin(30,2)
             self.winLog.resize(20,60)
-            self.winLog.mvwin(22,2)
         else:
             horizontalDividerIndex = int(round(maxY*0.8))
             verticalDividerIndex = int(round(maxX*0.8))
@@ -54,6 +56,18 @@ class windowManager:
             self.winLog.addstr(line,1,stringToWrite.rjust(17))
             line +=1
         self.winLog.refresh()
+
+    def showSessions(self,names):
+        self.winOptions.clear()
+        self.winOptions.border()
+        column = 100
+        index = 1
+        for i in names:
+            strToWrite = str(index) +". " + i.ljust(15)
+            self.winOptions.addstr(1,column,strToWrite)
+            column += len(strToWrite)
+            index +=1
+        self.winOptions.refresh()
 
     def drawTime(self,time,positive):
         digits = self.secondsToDigits(time)

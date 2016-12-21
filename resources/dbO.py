@@ -24,6 +24,14 @@ class dbO:
             retObj.append(record)
         return retObj
 
+    def getAllSessionNames(self):
+        allSessionNames = []
+        dbCurs = self.db.execute("""    SELECT DISTINCT session FROM TIMES
+        """)
+        for record in dbCurs:
+            allSessionNames.append(str(record[0]))
+        return allSessionNames
+
     def writeDb(self,solve):
         self.db.execute("INSERT INTO TIMES VALUES (?,?,?,?,?)",(solve['session'],solve['time'],solve['plusTwo'],solve['date'],solve['scramble']))
         self.db.commit()

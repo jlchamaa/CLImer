@@ -10,7 +10,7 @@ class session:
         self.dbObject = dbO.dbO()
         self.winMan = windowManager.windowManager(stdscr)
         self.inspection = 7
-        self.sessionName = "JLC"
+        self.sessionName = "Chamaa"
         self.solve = {}
 
     def processMainInput(self,inputKey):
@@ -78,5 +78,6 @@ class session:
             self.winMan.showScramble(scramble)
             self.solve['scramble'] = scramble
             self.winMan.showLog(self.dbObject.deliverDb(self.sessionName))
+            self.winMan.showSessions(self.dbObject.getAllSessionNames())
             mainInput = self.winMan.getKey() 
             status = self.processMainInput(mainInput)
