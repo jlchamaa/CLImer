@@ -10,7 +10,8 @@ class session:
         self.dbObject = dbO.dbO()
         self.winMan = windowManager.windowManager(stdscr)
         self.inspection = 7
-        self.sessionName = "Chamaa"
+        self.allSessions = self.dbObject.getAllSessionNames()
+        self.session = 0
         self.solve = {}
 
     def processMainInput(self,inputKey):
@@ -18,12 +19,15 @@ class session:
             self.solve['time'] = self.timer()
             if(self.solve['time']>0):
                 self.solve['plusTwo'] = True
-                self.solve['session'] = self.sessionName 
+                self.solve['session'] = self.allSessions[self.session]
                 self.solve['date'] = datetime.datetime.now()
                 self.dbObject.writeDb(self.solve)
             else:
                 self.solve.clear()
                 self.winMan.drawTime(0,True)
+            return True
+        elif(inputKey.isdigit()):
+            self.session = int(inputKey) - 1 # to account for arrays being -1
             return True
         elif(inputKey == 'e'):
             return False
@@ -77,7 +81,7 @@ class session:
             scramble = self.createScramble()
             self.winMan.showScramble(scramble)
             self.solve['scramble'] = scramble
-            self.winMan.showLog(self.dbObject.deliverDb(self.sessionName))
-            self.winMan.showSessions(self.dbObject.getAllSessionNames())
+            self.winMan.showLog(self.dbObject.deliverDb(self.allSessions[self.session]))
+            self.winMan.showSessions(self.allSessions,self.session)
             mainInput = self.winMan.getKey() 
             status = self.processMainInput(mainInput)

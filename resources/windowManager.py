@@ -57,14 +57,17 @@ class windowManager:
             line +=1
         self.winLog.refresh()
 
-    def showSessions(self,names):
+    def showSessions(self,names,current):
         self.winOptions.clear()
         self.winOptions.border()
         column = 100
         index = 1
-        for i in names:
-            strToWrite = str(index) +". " + i.ljust(15)
-            self.winOptions.addstr(1,column,strToWrite)
+        for i in range(0,len(names)):
+            attributes = curses.A_NORMAL
+            if i == current:
+                attributes = curses.A_REVERSE
+            strToWrite = (str(i+1) +". " + names[i]).center(15)
+            self.winOptions.addstr(1,column,strToWrite,attributes)
             column += len(strToWrite)
             index +=1
         self.winOptions.refresh()
