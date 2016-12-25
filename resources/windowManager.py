@@ -72,6 +72,23 @@ class windowManager:
             index +=1
         self.winOptions.refresh()
 
+    def ask(self,question):
+        if question == 'add':
+            strToWrite = "Do you want to create a new session? (y/n): "
+            self.winOptions.clear()
+            self.winOptions.addstr(1,7,strToWrite)
+            self.winOptions.refresh()
+            response = self.winOptions.getkey()
+            if response.lower() == 'y':
+                curses.echo()
+                curses.curs_set(1)
+                self.winOptions.addstr(" Name: ")
+                seshName = self.winOptions.getstr()
+                curses.curs_set(0)
+                curses.noecho()
+            else:
+                raise NameError("Didn't want new session")
+
     def drawTime(self,time,positive):
         digits = self.secondsToDigits(time)
         i=0

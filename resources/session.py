@@ -73,15 +73,27 @@ class session:
             lastDir=newDir
             scramble += newDir
             scramble += cases[random.randint(0,2)]
-        return scramble
+            self.solve['scramble'] = scramble
+            self.winMan.showScramble(scramble)
+
+    def showSessionsAndLogs(self):
+            try:
+                self.winMan.showLog(self.dbObject.deliverDb(self.allSessions[self.session]))
+                self.winMan.showSessions(self.allSessions,self.session)
+            except IndexError:
+                self.winMan.ask('add')
     def play(self):
         status = True;
         while status: 
-            self.solve.clear()
-            scramble = self.createScramble()
-            self.winMan.showScramble(scramble)
-            self.solve['scramble'] = scramble
-            self.winMan.showLog(self.dbObject.deliverDb(self.allSessions[self.session]))
-            self.winMan.showSessions(self.allSessions,self.session)
-            mainInput = self.winMan.getKey() 
-            status = self.processMainInput(mainInput)
+            try:
+                self.solve.clear()
+                self.createScramble()
+                self.showSessionsAndLogs()
+                mainInput = self.winMan.getKey() 
+                status = self.processMainInput(mainInput)
+            except NameError:
+                if self.session == 0:
+                    status = False
+                    continue
+                else:
+                    self.session = 0
