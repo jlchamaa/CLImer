@@ -42,7 +42,7 @@ class session:
         while(True): #character for space
             now = time.time()
             tick = round(now-start-self.inspection,2)
-            if(curtime!=tick):
+            if(curtime!=tick): 
                 curtime=tick
                 self.winMan.drawTime(abs(curtime),curtime>0)
             d = self.winMan.getCh()
