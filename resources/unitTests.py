@@ -1,13 +1,8 @@
 import unittest
-import dbO
-import sqlite3
+from unittest.mock import MagicMock
 
 class Test_DB_methods(unittest.TestCase):
 
-    def setUp(self):
-        self.db_Instance = dbO.dbO()
-    def test_connection:
-        newCurs = sqlite3
         
 
 

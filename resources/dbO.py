@@ -2,12 +2,19 @@ import sqlite3
 import os
 class dbO:
     def __init__(self):
-        pathOfResources = os.path.dirname(os.path.abspath(__file__))
-        requiredDbPath = pathOfResources + "/times.db"
+        self.connectToDataBase()
+
+    def connectToDataBase(self):
+        requiredDbPath = self.getResourcePath()
         if(os.path.isfile(requiredDbPath)):
             self.db = sqlite3.connect(requiredDbPath)
         else:
             self.db = self.createDb(requiredDbPath)
+
+    def getResourcePath(self):
+        pathOfResources = os.path.dirname(os.path.abspath(__file__))
+        requiredDbPath = pathOfResources + "/times.db"
+        return requiredDbPath
 
     def createDb(self,requiredDbPath):
         db = sqlite3.connect(requiredDbPath)
