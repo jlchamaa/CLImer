@@ -1,1 +1,3 @@
 resources/times.db
+*.pyc
+resources/__pycache__
