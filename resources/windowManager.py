@@ -25,7 +25,7 @@ class windowManager:
             self.winOptions.mvwin(21,0)
             self.winOptions.resize(4,maxX)
             self.winLog.mvwin(30,2)
-            self.winLog.resize(20,60)
+            self.winLog.resize(30,60)
         else:
             horizontalDividerIndex = int(round(maxY*0.8))
             verticalDividerIndex = int(round(maxX*0.8))

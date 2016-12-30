@@ -11,10 +11,21 @@ class dbO:
 
     def createDb(self,requiredDbPath):
         db = sqlite3.connect(requiredDbPath)
-        db.execute("""CREATE TABLE TIMES
-                    (session text, time real, plusTwo int, date text, scramble text)""")
+        db.execute("""CREATE TABLE SESSIONS(
+                        sessionNumber INTEGER PRIMARY KEY,
+                        name TEXT);""")
+        db.execute("""CREATE TABLE TIMES(
+                        number INTEGER,
+                        time REAL,
+                        ao5 REAL,
+                        ao12 REAL,
+                        avg REAL,
+                        plusTwo INTEGER,
+                        date TEXT,
+                        scramble TEXT,
+                        session INT NOT NULL,
+                        FOREIGN KEY (session) REFERENCES SESSIONS (sessionNumber));""")
         return db
-
     def deliverDb(self,seshName):
         retObj = []
         sessionName = (seshName,)
