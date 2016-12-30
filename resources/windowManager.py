@@ -4,8 +4,8 @@ NumericWidth = 142
 class windowManager:
     def __init__(self,stdscr):
         curses.curs_set(0)
-	self.initializeWindows(stdscr)
-	self.resizeWindows()
+        self.initializeWindows(stdscr)
+        self.resizeWindows()
 
     def initializeWindows(self,stdscr):
         self.mainScreen = stdscr
@@ -40,7 +40,7 @@ class windowManager:
     def showScramble(self,scramble):
         #self.winScramble.erase()
         (maxY,maxX)=self.winScramble.getmaxyx()
-        startXCoord = (maxX-len(scramble))/2
+        startXCoord = int((maxX-len(scramble))/2)
         startYCoord = maxY-1
         self.winScramble.erase()
         self.winScramble.border()
