@@ -23,14 +23,14 @@ class dbO:
                         name TEXT);""")
         db.execute("""CREATE TABLE TIMES(
                         number INTEGER,
+                        session INT NOT NULL,
                         time REAL,
-                        ao5 REAL,
-                        ao12 REAL,
-                        avg REAL,
                         plusTwo INTEGER,
                         date TEXT,
                         scramble TEXT,
-                        session INT NOT NULL,
+                        ao5 REAL,
+                        ao12 REAL,
+                        avg REAL,
                         FOREIGN KEY (session) REFERENCES SESSIONS (sessionNumber));""")
         return db
     def deliverDb(self,seshName):
@@ -42,14 +42,25 @@ class dbO:
             retObj.append(record)
         return retObj
 
+    def addSession(self,name):
+        #TODO reject duplicate names
+        self.db.execute("INSERT INTO SESSIONS (name) VALUES (?);",(name,))
+        self.db.commit()
+
     def getAllSessionNames(self):
         allSessionNames = []
-        dbCurs = self.db.execute("""    SELECT DISTINCT session FROM TIMES
-        """)
+        dbCurs = self.db.execute("""SELECT DISTINCT name FROM SESSIONS;""")
         for record in dbCurs:
-            allSessionNames.append(str(record[0]))
+            allSessionNames.append(str(record[0],'utf-8'))
         return allSessionNames
 
     def writeDb(self,solve):
-        self.db.execute("INSERT INTO TIMES VALUES (?,?,?,?,?)",(solve['session'],solve['time'],solve['plusTwo'],solve['date'],solve['scramble']))
+        ao5,ao12,avg = self.getAverages(solve['session'],solve['time'])
+        self.db.execute("INSERT INTO TIMES (session,time,plusTwo,date,scramble) VALUES (?,?,?,?,?)",(solve['session'],solve['time'],solve['plusTwo'],solve['date'],solve['scramble']))
         self.db.commit()
+    def getAverages(self,session,newTime):
+#TODO WRITE THIS FUNCTION
+        average = 1
+        ao12 = 1
+        ao5 = 1
+        return ao5,ao12,average

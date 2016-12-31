@@ -66,7 +66,7 @@ class windowManager:
             attributes = curses.A_NORMAL
             if i == current:
                 attributes = curses.A_REVERSE
-            strToWrite = (str(i+1) +". " + names[i]).center(15)
+            strToWrite = (str(i+1) +'. ' + names[i]).center(15)
             self.winOptions.addstr(1,column,strToWrite,attributes)
             column += len(strToWrite)
             index +=1
@@ -86,6 +86,7 @@ class windowManager:
                 seshName = self.winOptions.getstr()
                 curses.curs_set(0)
                 curses.noecho()
+                return seshName
             else:
                 raise NameError("Didn't want new session")
 
@@ -102,7 +103,7 @@ class windowManager:
             lineToWrite += self.fetchDigitChunk(digitsLine,10,True) # add decimal
             lineToWrite += self.fetchDigitChunk(digitsLine,digits['tenths'],True) # add tenths
             lineToWrite += self.fetchDigitChunk(digitsLine,digits['hundredths'],positive) # add hundredths
-            indentation = (NumericWidth - len(lineToWrite))/2
+            indentation = (NumericWidth - len(lineToWrite))//2
             self.winTimer.addstr(i,indentation,lineToWrite)
             i += 1
     def secondsToDigits(self,time):

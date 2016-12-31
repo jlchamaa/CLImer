@@ -9,8 +9,7 @@ class session:
     def __init__(self,stdscr):
         self.dbObject = dbO.dbO()
         self.winMan = windowManager.windowManager(stdscr)
-        self.inspection = 7
-        self.allSessions = self.dbObject.getAllSessionNames()
+        self.inspection = 15
         self.session = 0
         self.solve = {}
 
@@ -39,20 +38,20 @@ class session:
         d="p" # not space
         curtime=0
         start = time.time()
-        while(True): #character for space
+        while(True): 
             now = time.time()
             tick = round(now-start-self.inspection,2)
             if(curtime!=tick): 
                 curtime=tick
                 self.winMan.drawTime(abs(curtime),curtime>0)
             d = self.winMan.getCh()
-            if d==32:
+            if d==32: #number for space bar
                 if curtime<0:
                     start = now - self.inspection
                     continue
                 else:
                     break
-            elif d==27 and curtime<0:
+            elif d==27 and curtime<0: #number for ESC, abort solve
                 curses.beep()
                 break
         self.winMan.noDelayOn(0)
@@ -80,15 +79,21 @@ class session:
             try:
                 self.winMan.showLog(self.dbObject.deliverDb(self.allSessions[self.session]))
                 self.winMan.showSessions(self.allSessions,self.session)
+                return True
             except IndexError:
-                self.winMan.ask('add')
+                newSeshName = self.winMan.ask('add')
+                self.dbObject.addSession(newSeshName)
+                return False
+
     def play(self):
         status = True;
         while status: 
             try:
+                self.allSessions = self.dbObject.getAllSessionNames()
                 self.solve.clear()
                 self.createScramble()
-                self.showSessionsAndLogs()
+                if not self.showSessionsAndLogs(): #if we encountered an exception,
+                    continue                    #start the loop over
                 mainInput = self.winMan.getKey() 
                 status = self.processMainInput(mainInput)
             except NameError:
@@ -97,3 +102,4 @@ class session:
                     continue
                 else:
                     self.session = 0
+                    continue
