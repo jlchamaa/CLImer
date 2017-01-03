@@ -5,12 +5,13 @@ import time
 import curses
 import random
 
+
 class session:
     def __init__(self,stdscr):
         self.dbObject = dbO.dbO()
         self.winMan = windowManager.windowManager(stdscr)
         self.inspection = 15
-        self.session = 0
+        self.session ='1' 
         self.solve = {}
 
     def processMainInput(self,inputKey):
@@ -18,7 +19,7 @@ class session:
             self.solve['time'] = self.timer()
             if(self.solve['time']>0):
                 self.solve['plusTwo'] = True
-                self.solve['session'] = self.allSessions[self.session]
+                self.solve['session'] = self.session
                 self.solve['date'] = datetime.datetime.now()
                 self.dbObject.writeDb(self.solve)
             else:
@@ -26,7 +27,7 @@ class session:
                 self.winMan.drawTime(0,True)
             return True
         elif(inputKey.isdigit()):
-            self.session = int(inputKey) - 1 # to account for arrays being -1
+            self.session = str(inputKey)
             return True
         elif(inputKey == 'e'):
             return False
@@ -76,30 +77,34 @@ class session:
             self.winMan.showScramble(scramble)
 
     def showSessionsAndLogs(self):
+#return code (0,carry on) (1, restart loop) (2, abort)
             try:
-                self.winMan.showLog(self.dbObject.deliverDb(self.allSessions[self.session]))
+                self.allSessions[self.session] #will raise exception if invalid
                 self.winMan.showSessions(self.allSessions,self.session)
-                return True
-            except IndexError:
+                self.winMan.showLog(self.dbObject.deliverDb(self.session))
+                return 0
+            except KeyError:
                 newSeshName = self.winMan.ask('add')
-                self.dbObject.addSession(newSeshName)
-                return False
-
+                if newSeshName != None :
+                    self.dbObject.addSession(self.session,newSeshName)
+                    return 1
+                elif self.session == '1':
+                    return 2
+                else:
+                    self.session = '1'
+                    return 1
     def play(self):
         status = True;
         while status: 
-            try:
-                self.allSessions = self.dbObject.getAllSessionNames()
-                self.solve.clear()
-                self.createScramble()
-                if not self.showSessionsAndLogs(): #if we encountered an exception,
-                    continue                    #start the loop over
-                mainInput = self.winMan.getKey() 
-                status = self.processMainInput(mainInput)
-            except NameError:
-                if self.session == 0:
-                    status = False
-                    continue
-                else:
-                    self.session = 0
-                    continue
+            self.allSessions = self.dbObject.getAllSessionNames()
+            self.solve.clear()
+            self.createScramble()
+            value = self.showSessionsAndLogs()
+            if value == 2:
+                status = False
+                continue
+            elif value == 1:
+                continue
+                #value = 0 will just fall through, as we wish
+            mainInput = self.winMan.getKey() 
+            status = self.processMainInput(mainInput)

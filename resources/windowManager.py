@@ -52,7 +52,7 @@ class windowManager:
         self.winLog.border()
         line = 0
         for i in dataObj:
-            stringToWrite = str(i[0])
+            stringToWrite = str(i[1])+ ". " + str(i[0])
             self.winLog.addstr(line,1,stringToWrite.rjust(17))
             line +=1
         self.winLog.refresh()
@@ -60,16 +60,14 @@ class windowManager:
     def showSessions(self,names,current):
         self.winOptions.clear()
         self.winOptions.border()
-        column = 100
-        index = 1
-        for i in range(0,len(names)):
+        column = 10
+        for curNum,curName in sorted(names.items()):
             attributes = curses.A_NORMAL
-            if i == current:
+            if curNum == str(current):
                 attributes = curses.A_REVERSE
-            strToWrite = (str(i+1) +'. ' + names[i]).center(15)
+            strToWrite = '{:^30}'.format(curNum +'. ' + curName)
             self.winOptions.addstr(1,column,strToWrite,attributes)
             column += len(strToWrite)
-            index +=1
         self.winOptions.refresh()
 
     def ask(self,question):
@@ -88,7 +86,7 @@ class windowManager:
                 curses.noecho()
                 return seshName
             else:
-                raise NameError("Didn't want new session")
+                return None 
 
     def drawTime(self,time,positive):
         digits = self.secondsToDigits(time)
