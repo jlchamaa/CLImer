@@ -18,21 +18,24 @@ class session:
         if(inputKey==' '):
             self.solve['time'] = self.timer()
             if(self.solve['time']>0):
-                self.solve['plusTwo'] = True
+                self.solve['plusTwo'] = False
                 self.solve['session'] = self.session
                 self.solve['date'] = datetime.datetime.now()
                 self.dbObject.writeDb(self.solve)
             else:
                 self.solve.clear()
                 self.winMan.drawTime(0,True)
-            return True
+            return 2
         elif(inputKey.isdigit()):
             self.session = str(inputKey)
-            return True
+            return 2
         elif(inputKey == 'e'):
-            return False
+            return 0
+        elif(inputKey == 'p'):
+            self.dbObject.plusTwo(self.session)
+            return 2
         else:
-            return True
+            return 1
 
     def timer(self):
         self.winMan.noDelayOn(1)
@@ -56,6 +59,7 @@ class session:
                 curses.beep()
                 break
         self.winMan.noDelayOn(0)
+        self.createScramble()
         return curtime
 
     def createScramble(self):
@@ -81,7 +85,7 @@ class session:
             try:
                 self.allSessions[self.session] #will raise exception if invalid
                 self.winMan.showSessions(self.allSessions,self.session)
-                self.winMan.showLog(self.dbObject.deliverDb(self.session))
+                self.winMan.showLog(self.dbObject.deliverDb(self.session,30))
                 return 0
             except KeyError:
                 newSeshName = self.winMan.ask('add')
@@ -94,17 +98,19 @@ class session:
                     self.session = '1'
                     return 1
     def play(self):
-        status = True;
-        while status: 
+        status = 2;
+        self.createScramble()
+        while status == 2: 
             self.allSessions = self.dbObject.getAllSessionNames()
             self.solve.clear()
-            self.createScramble()
             value = self.showSessionsAndLogs()
             if value == 2:
-                status = False
+                status = 0
                 continue
             elif value == 1:
                 continue
                 #value = 0 will just fall through, as we wish
-            mainInput = self.winMan.getKey() 
-            status = self.processMainInput(mainInput)
+            status = 1
+            while status == 1:
+                mainInput = self.winMan.getKey() 
+                status = self.processMainInput(mainInput)

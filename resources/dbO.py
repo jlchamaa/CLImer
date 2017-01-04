@@ -33,10 +33,9 @@ class dbO:
                         avg REAL,
                         FOREIGN KEY (session) REFERENCES SESSIONS (sessionNumber));""")
         return db
-    def deliverDb(self,sessionNumber):
+    def deliverDb(self,sessionNumber,numberOfRecords):
         retObj = []
-        sessionNumber = (int(sessionNumber),)
-        dbCurs = self.db.execute("""SELECT time,number,plusTwo FROM TIMES WHERE session=? ORDER BY number DESC LIMIT 20 ;""",sessionNumber)
+        dbCurs = self.db.execute("""SELECT time,number,plusTwo FROM TIMES WHERE session=? ORDER BY number DESC LIMIT ?;""",(sessionNumber, numberOfRecords))
         for record in dbCurs: 
             retObj.append(record)
         return retObj
@@ -57,7 +56,7 @@ class dbO:
         return allSessionNames
 
     def writeDb(self,solve):
-        sessionSoFar = self.deliverDb(solve['session'])
+        sessionSoFar = self.deliverDb(solve['session'],12)
         number = self.getNumber(sessionSoFar)
         ao5,ao12,avg = self.getAverages(sessionSoFar,solve['time'])
         self.db.execute("INSERT INTO TIMES VALUES (?,?,?,?,?,?,?,?,?);",(number,solve['session'],solve['time'],solve['plusTwo'],solve['date'],solve['scramble'],ao5,ao12,avg))
@@ -96,3 +95,14 @@ class dbO:
             ao12 = 0
         average = 1
         return ao5,ao12,average
+    def plusTwo(self,session):
+        recordInQuestion = self.deliverDb(session,1)
+        currentPlusTwo = recordInQuestion[0][2]
+        number = recordInQuestion[0][1]
+        if currentPlusTwo :
+            newTime = recordInQuestion[0][0] - 2
+        else:
+            newTime = recordInQuestion[0][0] + 2
+        plusTwo = True
+        self.db.execute("UPDATE TIMES SET time = ? , plusTwo = ? WHERE number = ?;",(newTime,not currentPlusTwo,number))
+        self.db.commit()

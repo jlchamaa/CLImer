@@ -23,7 +23,7 @@ class windowManager:
             self.winScramble.mvwin(17,0)
             self.winScramble.resize(3,maxX)
             self.winOptions.mvwin(21,0)
-            self.winOptions.resize(4,maxX)
+            self.winOptions.resize(7,maxX)
             self.winLog.mvwin(30,2)
             self.winLog.resize(30,60)
         else:
@@ -50,23 +50,36 @@ class windowManager:
     def showLog(self,dataObj):
         self.winLog.clear()
         self.winLog.border()
-        line = 0
+        line = 1
         for i in dataObj:
-            stringToWrite = str(i[1])+ ". " + str(i[0])
-            self.winLog.addstr(line,1,stringToWrite.rjust(17))
+            stringToWrite = str(i[1])+ ". " 
+            time=i[0]
+            mins = int(time / 60)
+            sex = time % 60
+            timeToWrite=""
+            if mins > 0:
+                timeToWrite += str(mins) + ":"
+                timeToWrite += "{:0>5.2f}".format(sex)
+            else:
+                timeToWrite += "{0:.2f}".format(sex)
+            stringToWrite += timeToWrite.rjust(8)
+            if i[2]:
+                stringToWrite+="+"
+            self.winLog.addstr(line,2,stringToWrite)
             line +=1
         self.winLog.refresh()
 
     def showSessions(self,names,current):
         self.winOptions.clear()
         self.winOptions.border()
+        self.winOptions.addstr(4,1,"(space) - start      (p) - plus 2     (d) - DNF.  Change to or create session 2 - (2)")
         column = 10
         for curNum,curName in sorted(names.items()):
             attributes = curses.A_NORMAL
             if curNum == str(current):
                 attributes = curses.A_REVERSE
             strToWrite = '{:^30}'.format(curNum +'. ' + curName)
-            self.winOptions.addstr(1,column,strToWrite,attributes)
+            self.winOptions.addstr(2,column,strToWrite,attributes)
             column += len(strToWrite)
         self.winOptions.refresh()
 
@@ -74,7 +87,8 @@ class windowManager:
         if question == 'add':
             strToWrite = "Do you want to create a new session? (y/n): "
             self.winOptions.clear()
-            self.winOptions.addstr(1,7,strToWrite)
+            self.winOptions.border()
+            self.winOptions.addstr(2,7,strToWrite)
             self.winOptions.refresh()
             response = self.winOptions.getkey()
             if response.lower() == 'y':
