@@ -6,7 +6,13 @@ class windowManager:
         curses.curs_set(0)
         self.initializeWindows(stdscr)
         self.resizeWindows()
-
+        self.initializeColors()
+    def initializeColors(self):
+        if curses.can_change_color():
+            curses.init_pair(1,curses.COLOR_GREEN, curses.COLOR_BLACK)
+            self.logColor = curses.color_pair(1)
+        else:
+            self.logColor = curses.color_pair(0)
     def initializeWindows(self,stdscr):
         self.mainScreen = stdscr
         self.winTimer = curses.newwin(1,1,0,0)
@@ -54,25 +60,28 @@ class windowManager:
         for i in dataObj:
             stringToWrite = str(i[1])+ ". " 
             time=i[0]
-            mins = int(time / 60)
-            sex = time % 60
-            timeToWrite=""
-            if mins > 0:
-                timeToWrite += str(mins) + ":"
-                timeToWrite += "{:0>5.2f}".format(sex)
+            if time == None:
+                stringToWrite += "     DNF"
             else:
-                timeToWrite += "{0:.2f}".format(sex)
-            stringToWrite += timeToWrite.rjust(8)
-            if i[2]:
-                stringToWrite+="+"
-            self.winLog.addstr(line,2,stringToWrite)
+                mins = int(time / 60)
+                sex = time % 60
+                timeToWrite=""
+                if mins > 0:
+                    timeToWrite += str(mins) + ":"
+                    timeToWrite += "{:0>5.2f}".format(sex)
+                else:
+                    timeToWrite += "{0:.2f}".format(sex)
+                stringToWrite += timeToWrite.rjust(8)
+                if i[2]:
+                    stringToWrite+="+"
+            self.winLog.addstr(line,2,stringToWrite,self.logColor)
             line +=1
         self.winLog.refresh()
 
     def showSessions(self,names,current):
         self.winOptions.clear()
         self.winOptions.border()
-        self.winOptions.addstr(4,1,"(space) - start      (p) - plus 2     (d) - DNF.  Change to or create session 2 - (2)")
+        self.winOptions.addstr(4,1,"(Q)uit , (P)lus 2 , (D)NF , (E)rase Session , (R)emove Time, (space) Start")
         column = 10
         for curNum,curName in sorted(names.items()):
             attributes = curses.A_NORMAL
@@ -83,7 +92,7 @@ class windowManager:
             column += len(strToWrite)
         self.winOptions.refresh()
 
-    def ask(self,question):
+    def ask(self,question,context):
         if question == 'add':
             strToWrite = "Do you want to create a new session? (y/n): "
             self.winOptions.clear()
@@ -101,6 +110,17 @@ class windowManager:
                 return seshName
             else:
                 return None 
+        if question == 'removeSession':
+            strToWrite = "Do you want to delete this session and all of its times? (y/n): "
+            self.winOptions.clear()
+            self.winOptions.border()
+            self.winOptions.addstr(2,7,strToWrite)
+            self.winOptions.refresh()
+            response = self.winOptions.getkey()
+            if response.lower() == 'y':
+                return True
+            else:
+                return False
 
     def drawTime(self,time,positive):
         digits = self.secondsToDigits(time)
@@ -116,7 +136,10 @@ class windowManager:
             lineToWrite += self.fetchDigitChunk(digitsLine,digits['tenths'],True) # add tenths
             lineToWrite += self.fetchDigitChunk(digitsLine,digits['hundredths'],positive) # add hundredths
             indentation = (NumericWidth - len(lineToWrite))//2
-            self.winTimer.addstr(i,indentation,lineToWrite)
+            if(time == 12.0):
+                self.winTimer.addstr(i,indentation,lineToWrite,curses.A_REVERSE)
+            else:
+                self.winTimer.addstr(i,indentation,lineToWrite)
             i += 1
     def secondsToDigits(self,time):
         timeDigits = {}
