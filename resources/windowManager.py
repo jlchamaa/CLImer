@@ -4,15 +4,19 @@ NumericWidth = 142
 class windowManager:
     def __init__(self,stdscr):
         curses.curs_set(0)
+        self.initializeColors()
         self.initializeWindows(stdscr)
         self.resizeWindows()
-        self.initializeColors()
     def initializeColors(self):
         if curses.can_change_color():
-            curses.init_pair(1,curses.COLOR_GREEN, curses.COLOR_BLACK)
-            self.logColor = curses.color_pair(1)
+            curses.init_color(1,100,100,100) #color 1 is grey
+            curses.init_pair(1,curses.COLOR_CYAN, 1) #timer
+            curses.init_pair(2,curses.COLOR_WHITE, 1) # background
+            curses.init_pair(3,curses.COLOR_GREEN, 1) # scramble
+
         else:
-            self.logColor = curses.color_pair(0)
+            curses.init_pair(1,curses.COLOR_WHITE,curses.COLOR_BLACK)
+            curses.init_pair(2,curses.COLOR_WHITE,curses.COLOR_BLACK)
     def initializeWindows(self,stdscr):
         self.mainScreen = stdscr
         self.winTimer = curses.newwin(1,1,0,0)
@@ -23,15 +27,21 @@ class windowManager:
 
     def resizeWindows(self):
         (maxY,maxX) = self.mainScreen.getmaxyx()
+        self.mainScreen.bkgd(' ',curses.color_pair(1))
+        self.mainScreen.refresh()
         if(maxX>NumericWidth):
             self.winTimer.mvwin(1,int((maxX-NumericWidth)/2))
             self.winTimer.resize(16,NumericWidth+1)
+            self.winTimer.bkgd(' ',curses.color_pair(1))
             self.winScramble.mvwin(17,0)
             self.winScramble.resize(3,maxX)
+            self.winScramble.bkgd(' ',curses.color_pair(1))
             self.winOptions.mvwin(21,0)
             self.winOptions.resize(7,maxX)
+            self.winOptions.bkgd(' ',curses.color_pair(1))
             self.winLog.mvwin(30,2)
             self.winLog.resize(30,60)
+            self.winLog.bkgd(' ',curses.color_pair(1))
         else:
             horizontalDividerIndex = int(round(maxY*0.8))
             verticalDividerIndex = int(round(maxX*0.8))
@@ -42,6 +52,7 @@ class windowManager:
             self.winOptions.resize(maxY-horizontalDividerIndex+1,verticalDividerIndex-1)
             self.winStats.mvwin(horizontalDividerIndex+1,verticalDividerIndex+1)
             self.winStats.resize(maxY-horizontalDividerIndex+1,maxX-verticalDividerIndex+1)
+        curses.doupdate()
 
     def showScramble(self,scramble):
         #self.winScramble.erase()
@@ -74,7 +85,7 @@ class windowManager:
                 stringToWrite += timeToWrite.rjust(8)
                 if i[2]:
                     stringToWrite+="+"
-            self.winLog.addstr(line,2,stringToWrite,self.logColor)
+            self.winLog.addstr(line,2,stringToWrite)
             line +=1
         self.winLog.refresh()
 
@@ -136,10 +147,7 @@ class windowManager:
             lineToWrite += self.fetchDigitChunk(digitsLine,digits['tenths'],True) # add tenths
             lineToWrite += self.fetchDigitChunk(digitsLine,digits['hundredths'],positive) # add hundredths
             indentation = (NumericWidth - len(lineToWrite))//2
-            if(time == 12.0):
-                self.winTimer.addstr(i,indentation,lineToWrite,curses.A_REVERSE)
-            else:
-                self.winTimer.addstr(i,indentation,lineToWrite)
+            self.winTimer.addstr(i,indentation,lineToWrite)
             i += 1
     def secondsToDigits(self,time):
         timeDigits = {}
