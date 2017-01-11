@@ -7,12 +7,13 @@ class windowManager:
         self.initializeColors()
         self.initializeWindows(stdscr)
         self.resizeWindows()
+        self.blinking = False;
     def initializeColors(self):
         if curses.can_change_color():
             curses.init_color(1,100,100,100) #color 1 is grey
-            curses.init_pair(1,curses.COLOR_CYAN, 1) #timer
-            curses.init_pair(2,curses.COLOR_WHITE, 1) # background
-            curses.init_pair(3,curses.COLOR_GREEN, 1) # scramble
+            curses.init_pair(1,curses.COLOR_CYAN,1) #timer
+            curses.init_pair(2,curses.COLOR_WHITE,1) # background
+            curses.init_pair(3,1,curses.COLOR_CYAN) # scramble
 
         else:
             curses.init_pair(1,curses.COLOR_WHITE,curses.COLOR_BLACK)
@@ -43,16 +44,14 @@ class windowManager:
             self.winLog.resize(30,60)
             self.winLog.bkgd(' ',curses.color_pair(1))
         else:
-            horizontalDividerIndex = int(round(maxY*0.8))
-            verticalDividerIndex = int(round(maxX*0.8))
-            self.winTimer.resize(horizontalDividerIndex-1,verticalDividerIndex-1)
-            self.winLog.mvwin(0,verticalDividerIndex+1)
-            self.winLog.resize(horizontalDividerIndex-1,maxX-verticalDividerIndex+1)
-            self.winOptions.mvwin(horizontalDividerIndex+1,0)
-            self.winOptions.resize(maxY-horizontalDividerIndex+1,verticalDividerIndex-1)
-            self.winStats.mvwin(horizontalDividerIndex+1,verticalDividerIndex+1)
-            self.winStats.resize(maxY-horizontalDividerIndex+1,maxX-verticalDividerIndex+1)
+            raise ValueError('toosmall')
         curses.doupdate()
+
+    def centerTime(self):
+        (maxY,maxX) = self.mainScreen.getmaxyx()
+        self.winTimer.mvwin(int((maxY-16)/2),int((maxX-NumericWidth)/2))
+        self.mainScreen.bkgd(' ',curses.color_pair(1))
+        self.mainScreen.refresh()
 
     def showScramble(self,scramble):
         #self.winScramble.erase()
@@ -134,6 +133,35 @@ class windowManager:
                 return False
 
     def drawTime(self,time,positive):
+        if not positive:
+            if int(time) == 3 or int(time) == 2 or int(time) == 4: 
+                if not self.blinking:
+                    if (int(time*10) % 10) == 1:
+                        self.mainScreen.bkgd(' ',curses.color_pair(3))
+                        self.mainScreen.refresh()
+                        self.blinking = not self.blinking
+                if self.blinking:
+                    if (int(time*10) % 10) == 0:
+                        self.mainScreen.bkgd(' ',curses.color_pair(1))
+                        self.mainScreen.refresh()
+                        self.blinking = not self.blinking
+            if int(time) == 1 or int(time) == 0: 
+                if not self.blinking:
+                    if (int(time*10) % 4) == 2:
+                        self.mainScreen.bkgd(' ',curses.color_pair(3))
+                        self.mainScreen.refresh()
+                        self.blinking = not self.blinking
+                if self.blinking:
+                    if (int(time*10) % 4) == 0:
+                        self.mainScreen.bkgd(' ',curses.color_pair(1))
+                        self.mainScreen.refresh()
+                        self.blinking = not self.blinking
+        if positive and self.blinking:
+            self.mainScreen.bkgd(' ',curses.color_pair(1))
+            self.mainScreen.refresh()
+            self.blinking = not self.blinking
+            
+
         digits = self.secondsToDigits(time)
         i=0
         for digitsLine in bigDigits:

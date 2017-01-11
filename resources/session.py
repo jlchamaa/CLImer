@@ -17,13 +17,14 @@ class session:
 
     def processMainInput(self,inputKey):
         if(inputKey==' '):
+            self.winMan.centerTime()
             result,p2 = self.timer()
+            self.winMan.resizeWindows()
             if result is None or result>0:
                 self.solve['time'] = result
                 self.solve['plusTwo'] = p2
                 self.solve['session'] = self.session
                 self.solve['date'] = datetime.datetime.now()
-                self.solve.setdefault('scramble','RAWR')
                 self.dbObject.writeDb(self.solve)
             self.solve.clear()
             self.createScramble()
