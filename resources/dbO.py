@@ -45,6 +45,7 @@ class dbO:
 
     def addSession(self,number,name):
         number = int(number)
+        name = name.decode("utf-8")
         self.db.execute("INSERT INTO SESSIONS VALUES (?,?);",(number,name))
         self.db.commit()
 
@@ -57,7 +58,7 @@ class dbO:
         dbCurs = self.db.execute("""SELECT * FROM SESSIONS ORDER BY sessionNumber ASC;""")
         for record in dbCurs:
             name = str(record[0])
-            value = str(record[1],'utf-8')
+            value = str(record[1])
             allSessionNames[name] = value 
         return allSessionNames
 

@@ -49,7 +49,7 @@ class windowManager:
 
     def centerTime(self):
         (maxY,maxX) = self.mainScreen.getmaxyx()
-        self.winTimer.mvwin(int((maxY-16)/2),int((maxX-NumericWidth)/2))
+        self.winTimer.mvwin(int((maxY-16)/3),int((maxX-NumericWidth)/3))
         self.mainScreen.bkgd(' ',curses.color_pair(1))
         self.mainScreen.refresh()
 
